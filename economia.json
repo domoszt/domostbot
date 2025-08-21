@@ -1,6 +1,6 @@
 {
     "1269085403483344957": {
-        "carteira": 9394.0,
+        "carteira": 0.0,
         "banco": 0.0,
         "cc_stats": {
             "jogos": 48,
@@ -21,7 +21,7 @@
             "lucro_total": 0
         }
     },
-    "cofre_impostos": 3746.0883,
+    "cofre_impostos": 1000.0883,
     "impostos_diarios": {
         "jogos": 49.5,
         "mercado": 24.500499999999995
@@ -38,7 +38,7 @@
         }
     },
     "1408213537226231900": {
-        "carteira": 10000,
+        "carteira": 0.0,
         "banco": 0,
         "acoes": {},
         "cc_stats": {

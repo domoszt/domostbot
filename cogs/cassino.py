@@ -6,77 +6,75 @@ import os
 import json
 import asyncio
 
-# Caminho para o ficheiro de economia
+# --- CAMINHOS DE FICHEIRO ---
 DIRETORIO_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARQUIVO_ECONOMIA = os.path.join(DIRETORIO_RAIZ, "economia.json")
 
-# --- VIEW PARA O DESAFIO DE BLACKJACK ---
-class ChallengeView(discord.ui.View):
-    def __init__(self, desafiante, desafiado, aposta, cassino_cog):
-        super().__init__(timeout=180.0)
-        self.desafiante = desafiante
-        self.desafiado = desafiado
-        self.aposta = aposta
+# --- VIEWS PARA OS JOGOS ---
+
+# View para o jogo contra a casa (PvE)
+class BlackjackView_PvE(discord.ui.View):
+    def __init__(self, autor_do_jogo, cassino_cog):
+        super().__init__(timeout=120.0)
+        self.autor_do_jogo = autor_do_jogo
         self.cassino_cog = cassino_cog
-        self.accepted = None
-
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user.id != self.desafiado.id:
-            await interaction.response.send_message("Este desafio não é para si!", ephemeral=True)
-            return False
-        return True
-
-    @discord.ui.button(label="Aceitar", style=discord.ButtonStyle.success, emoji="✅")
-    async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.accepted = True; self.stop()
-
-    @discord.ui.button(label="Recusar", style=discord.ButtonStyle.danger, emoji="✖️")
-    async def decline_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        self.accepted = False; self.stop()
-
-# --- VIEW PARA O JOGO 1V1 ---
-class PVPBlackjackView(discord.ui.View):
-    def __init__(self, jogo_id, cassino_cog):
-        super().__init__(timeout=180.0)
-        self.jogo_id = jogo_id
-        self.cassino_cog = cassino_cog
+        self.message: discord.Message = None # Irá guardar a mensagem do jogo
 
     async def on_timeout(self):
-        await self.cassino_cog.handle_timeout(self.jogo_id, self)
+        await self.cassino_cog.handle_timeout_pve(self.autor_do_jogo, self)
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        jogo = self.cassino_cog.jogos_em_andamento.get(self.jogo_id)
-        if not jogo: return False
-        if interaction.user.id not in jogo["jogadores"]:
+        if interaction.user.id != self.autor_do_jogo.id:
             await interaction.response.send_message("Este não é o seu jogo!", ephemeral=True)
-            return False
-        if interaction.user.id != jogo["turno_de"]:
-            await interaction.response.send_message("Não é a sua vez de jogar!", ephemeral=True)
             return False
         return True
 
     @discord.ui.button(label="Pedir Carta", style=discord.ButtonStyle.primary, emoji="➕")
     async def hit_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self.cassino_cog.pvp_acao_pedir_carta(interaction, self.jogo_id, self)
+        await self.cassino_cog.pve_acao_pedir_carta(interaction, self)
 
     @discord.ui.button(label="Parar", style=discord.ButtonStyle.success, emoji="✋")
     async def stand_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        await self.cassino_cog.pvp_acao_parar(interaction, self.jogo_id, self)
-    
+        await self.cassino_cog.pve_acao_parar(interaction, self)
+
     def desativar_botoes(self):
-        for item in self.children:
-            item.disabled = True
+        for item in self.children: item.disabled = True
+
+# View para o desafio PvP
+class ChallengeView(discord.ui.View):
+    def __init__(self, desafiante, desafiado, aposta, cassino_cog):
+        super().__init__(timeout=180.0); self.desafiante = desafiante; self.desafiado = desafiado; self.aposta = aposta; self.cassino_cog = cassino_cog; self.accepted = None
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id != self.desafiado.id: await interaction.response.send_message("Este desafio não é para si!", ephemeral=True); return False
+        return True
+    @discord.ui.button(label="Aceitar", style=discord.ButtonStyle.success, emoji="✅")
+    async def accept_button(self, interaction: discord.Interaction, button: discord.ui.Button): self.accepted = True; self.stop()
+    @discord.ui.button(label="Recusar", style=discord.ButtonStyle.danger, emoji="✖️")
+    async def decline_button(self, interaction: discord.Interaction, button: discord.ui.Button): self.accepted = False; self.stop()
+
+# View para o jogo PvP
+class PVPBlackjackView(discord.ui.View):
+    def __init__(self, jogo_id, cassino_cog):
+        super().__init__(timeout=180.0); self.jogo_id = jogo_id; self.cassino_cog = cassino_cog
+        self.message: discord.Message = None
+    async def on_timeout(self): await self.cassino_cog.handle_timeout_pvp(self.jogo_id)
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        jogo = self.cassino_cog.jogos_em_andamento.get(self.jogo_id)
+        if not jogo or interaction.user.id not in jogo["jogadores"]: await interaction.response.send_message("Este não é o seu jogo!", ephemeral=True); return False
+        if interaction.user.id != jogo["turno_de"]: await interaction.response.send_message("Não é a sua vez de jogar!", ephemeral=True); return False
+        return True
+    @discord.ui.button(label="Pedir Carta", style=discord.ButtonStyle.primary, emoji="➕")
+    async def hit_button(self, interaction: discord.Interaction, button: discord.ui.Button): await self.cassino_cog.pvp_acao_pedir_carta(interaction, self.jogo_id, self)
+    @discord.ui.button(label="Parar", style=discord.ButtonStyle.success, emoji="✋")
+    async def stand_button(self, interaction: discord.Interaction, button: discord.ui.Button): await self.cassino_cog.pvp_acao_parar(interaction, self.jogo_id, self)
+    def desativar_botoes(self):
+        for item in self.children: item.disabled = True
 
 class Cassino(commands.Cog):
     """Cog para todos os jogos de cassino e apostas."""
 
     def __init__(self, bot):
-        self.bot = bot
-        self.jogos_em_andamento = {}
-        self.naipes = ['Paus', 'Ouros', 'Copas', 'Espadas']; self.ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
-        self.valores_cartas = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
-
-    # ... (Funções auxiliares como format_brl, carregar_dados, etc., continuam iguais)
+        self.bot = bot; self.jogos_em_andamento = {}; self.naipes = ['Paus', 'Ouros', 'Copas', 'Espadas']; self.ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']; self.valores_cartas = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
     def format_brl(self, valor):
         try: return locale.currency(float(valor), grouping=True, symbol="R$")
         except:
@@ -90,13 +88,118 @@ class Cassino(commands.Cog):
     def criar_baralho(self):
         baralho = [{'rank': r, 'naipe': n} for r in self.ranks for n in self.naipes]; random.shuffle(baralho); return baralho
     def calcular_pontos(self, mao):
-        pontos = sum(self.valores_cartas[c['rank']] for c in mao)
-        num_ases = sum(1 for c in mao if c['rank'] == 'A')
+        pontos = sum(self.valores_cartas[c['rank']] for c in mao); num_ases = sum(1 for c in mao if c['rank'] == 'A')
         while pontos > 21 and num_ases: pontos -= 10; num_ases -= 1
         return pontos
     def formatar_mao(self, mao):
         emojis = {'Paus': '♣️', 'Ouros': '♦️', 'Copas': '♥️', 'Espadas': '♠️'}
         return ' '.join([f"[`{c['rank']}{emojis[c['naipe']]}`]" for c in mao])
+
+    @commands.command(name="blackjack", aliases=["bj"], help="Inicia um jogo de Vinte e Um contra a casa.")
+    async def blackjack(self, ctx, aposta_str: str):
+        id_usuario = str(ctx.author.id)
+        if any(g for g in self.jogos_em_andamento.values() if g['jogadores'].get(id_usuario)):
+            await ctx.send("Você já está numa partida!", delete_after=10); return
+        
+        economia_cog = self.bot.get_cog('Economia'); await economia_cog.abrir_conta(ctx.author)
+        dados = await self.carregar_dados_economia(); saldo_carteira = dados.get(id_usuario, {}).get("carteira", 0)
+        
+        if aposta_str.lower() in ['all', 'allin', 'tudo']: aposta = saldo_carteira
+        else:
+            try: aposta = int(aposta_str)
+            except ValueError: await ctx.send("❌ Aposta inválida. Use um número ou 'all'."); return
+        
+        if aposta <= 0: await ctx.send("A aposta deve ser positiva."); return
+        if saldo_carteira < aposta: await ctx.send(f"Você não tem dinheiro suficiente! Saldo: {self.format_brl(saldo_carteira)}"); return
+        
+        baralho = self.criar_baralho(); mao_jogador = [baralho.pop(), baralho.pop()]; mao_casa = [baralho.pop(), baralho.pop()]
+        
+        jogo = {"tipo": "pve", "jogadores": {ctx.author.id: ctx.author}, "aposta": aposta, "baralho": baralho, "mao_jogador": mao_jogador, "mao_casa": mao_casa}
+        self.jogos_em_andamento[id_usuario] = jogo
+        
+        view = BlackjackView_PvE(ctx.author, self)
+        embed = self.criar_embed_pve(ctx.author)
+        mensagem_jogo = await ctx.send(embed=embed, view=view)
+        view.message = mensagem_jogo # <-- Adiciona a referência da mensagem à View
+        
+        if self.calcular_pontos(mao_jogador) == 21:
+            await self.finalizar_jogo_pve(ctx.author, view, "blackjack_jogador")
+    
+    def criar_embed_pve(self, autor, status=None, final=False):
+        id_usuario = str(autor.id); jogo = self.jogos_em_andamento.get(id_usuario)
+        if not jogo: return discord.Embed(title="Jogo Terminado")
+        if not status: status = "É a sua vez de jogar!"
+        cor = discord.Color.dark_green()
+        if final:
+            if "ganhou" in status.lower(): cor = discord.Color.green()
+            elif "perdeu" in status.lower(): cor = discord.Color.red()
+            elif "empate" in status.lower(): cor = discord.Color.light_grey()
+            if "blackjack" in status.lower() and "ganhou" in status.lower(): cor = discord.Color.gold()
+        embed = discord.Embed(title="🎲 Jogo de Blackjack 🎲", description=f"**Aposta:** {self.format_brl(jogo['aposta'])}\n**Status:** {status}", color=cor)
+        pontos_jogador = self.calcular_pontos(jogo['mao_jogador'])
+        embed.add_field(name=f"{autor.display_name} ({pontos_jogador} pontos)", value=self.formatar_mao(jogo['mao_jogador']), inline=False)
+        if final: embed.add_field(name=f"Casa ({self.calcular_pontos(jogo['mao_casa'])} pontos)", value=self.formatar_mao(jogo['mao_casa']), inline=False)
+        else: embed.add_field(name=f"Casa ({self.calcular_pontos([jogo['mao_casa'][0]])}+ pontos)", value=f"{self.formatar_mao([jogo['mao_casa'][0]])} [`?`]", inline=False)
+        return embed
+
+    async def pve_acao_pedir_carta(self, interaction: discord.Interaction, view):
+        id_usuario = str(interaction.user.id); jogo = self.jogos_em_andamento.get(id_usuario)
+        if not jogo: await interaction.response.edit_message(content="Este jogo já terminou.", embed=None, view=None); return
+        jogo["mao_jogador"].append(jogo["baralho"].pop())
+        if self.calcular_pontos(jogo["mao_jogador"]) > 21:
+            await self.finalizar_jogo_pve(interaction.user, view, "jogador_estourou")
+        else:
+            embed = self.criar_embed_pve(interaction.user, "Você pediu uma carta. E agora?")
+            await interaction.response.edit_message(embed=embed, view=view)
+
+    async def pve_acao_parar(self, interaction: discord.Interaction, view):
+        view.desativar_botoes()
+        await interaction.response.defer()
+        await self.finalizar_jogo_pve(interaction.user, view)
+
+    async def finalizar_jogo_pve(self, autor, view, resultado_forçado=None):
+        id_usuario = str(autor.id); jogo = self.jogos_em_andamento.get(id_usuario)
+        if not jogo: return
+        view.desativar_botoes()
+        mao_jogador = jogo["mao_jogador"]; mao_casa = jogo["mao_casa"]; pontos_jogador = self.calcular_pontos(mao_jogador)
+        if not resultado_forçado:
+            pontos_casa = self.calcular_pontos(mao_casa)
+            while pontos_casa < 17:
+                mao_casa.append(jogo["baralho"].pop()); pontos_casa = self.calcular_pontos(mao_casa)
+        status_final, valor_final = self.determinar_vencedor_pve(pontos_jogador, self.calcular_pontos(mao_casa), jogo['aposta'], mao_jogador, mao_casa, resultado_forçado)
+        async with self.bot.economy_lock:
+            dados = await self.carregar_dados_economia()
+            dados[id_usuario]["carteira"] = dados[id_usuario].get("carteira", 0) + valor_final
+            if valor_final < 0: dados["cofre_impostos"] = dados.get("cofre_impostos", 0) + abs(valor_final)
+            await self.salvar_dados_economia(dados)
+        embed = self.criar_embed_pve(autor, status=status_final, final=True)
+        await view.message.edit(embed=embed, view=view)
+        await asyncio.sleep(20)
+        if id_usuario in self.jogos_em_andamento:
+            await view.message.edit(view=None); del self.jogos_em_andamento[id_usuario]
+
+    def determinar_vencedor_pve(self, p_jog, p_casa, aposta, m_jog, m_casa, forcado=None):
+        if forcado == "jogador_estourou": return f"Você estourou com {p_jog} pontos! Você perdeu.", -aposta
+        bj_jog = p_jog == 21 and len(m_jog) == 2; bj_casa = p_casa == 21 and len(m_casa) == 2
+        if forcado == "blackjack_jogador" or (bj_jog and not bj_casa): return "Blackjack! Você ganhou!", int(aposta * 1.5)
+        if bj_casa and not bj_jog: return "A Casa fez um Blackjack! Você perdeu.", -aposta
+        if p_casa > 21: return f"A Casa estourou com {p_casa} pontos! Você ganhou!", aposta
+        if p_jog > p_casa: return f"Você ganhou com {p_jog} contra {p_casa}!", aposta
+        if p_jog < p_casa: return f"Você perdeu com {p_jog} contra {p_casa}!", -aposta
+        else: return f"Empate! Ambos com {p_jog} pontos.", 0
+
+    async def handle_timeout_pve(self, autor, view):
+        id_usuario = str(autor.id); jogo = self.jogos_em_andamento.get(id_usuario)
+        if not jogo: return
+        embed = discord.Embed(title="🎲 Jogo de Blackjack 🎲", description="Jogo cancelado por inatividade. A aposta foi perdida para o cofre público.", color=discord.Color.dark_grey())
+        view.desativar_botoes()
+        if view.message: await view.message.edit(embed=embed, view=view)
+        async with self.bot.economy_lock:
+            dados = await self.carregar_dados_economia()
+            dados["cofre_impostos"] = dados.get("cofre_impostos", 0) + jogo["aposta"]
+            await self.salvar_dados_economia(dados)
+        del self.jogos_em_andamento[id_usuario]
+
 
     @commands.command(name="bjdesafio", help="Desafia outro membro para um jogo de Blackjack 1v1.")
     async def bjdesafio(self, ctx, oponente: discord.Member, aposta_str: str):
