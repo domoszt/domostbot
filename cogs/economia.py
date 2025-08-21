@@ -63,7 +63,7 @@ class Economia(commands.Cog):
         if precisa_salvar:
             await self.salvar_dados(dados)
 
-    @tasks.loop(time=time(hour=3, minute=0, second=0, tzinfo=timezone(timedelta(hours=-3))))
+    @tasks.loop(time=time(hour=18, minute=0, second=0, tzinfo=timezone(timedelta(hours=-3))))
     async def evento_economico_diario(self):
         dados_para_anuncio = {}
         async with self.bot.economy_lock:
