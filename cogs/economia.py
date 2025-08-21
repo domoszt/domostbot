@@ -116,7 +116,8 @@ class Economia(commands.Cog):
         saldo_carteira = dados[id_usuario].get("carteira", 0); saldo_banco = dados[id_usuario].get("banco", 0)
         embed = discord.Embed(title=f"💰 Saldo de {membro.display_name}", color=discord.Color.green())
         embed.add_field(name="Carteira", value=f"`{self.format_brl(saldo_carteira)}`", inline=True); embed.add_field(name="Banco", value=f"`{self.format_brl(saldo_banco)}`", inline=True)
-        embed.set_thumbnail(url=membro.avatar.url)
+        if membro.avatar:
+         embed.set_thumbnail(url=membro.avatar.url)
         await ctx.send(embed=embed)
 
     @commands.cooldown(1, 3600, commands.BucketType.user)
