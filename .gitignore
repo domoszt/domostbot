@@ -1,0 +1,10 @@
+# Ignorar o ficheiro de segredos
+.env
+
+# Ignorar ficheiros de cache do Python
+__pycache__/
+*.pyc
+
+# Ignorar ficheiros de log ou outros dados gerados
+*.log
+grafico.png

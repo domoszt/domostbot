@@ -1,0 +1,40 @@
+{
+    "1269085403483344957": {
+        "carteira": 0.0,
+        "banco": 0.0,
+        "cc_stats": {
+            "jogos": 48,
+            "vitorias": 15,
+            "total_apostado": 138378,
+            "lucro_total": 12473.349999999999
+        },
+        "acoes": {}
+    },
+    "907306461837799465": {
+        "carteira": 13,
+        "banco": 1831,
+        "acoes": {},
+        "cc_stats": {
+            "jogos": 0,
+            "vitorias": 0,
+            "total_apostado": 0,
+            "lucro_total": 0
+        }
+    },
+    "cofre_impostos": 2334.0883,
+    "impostos_diarios": {
+        "jogos": 49.5,
+        "mercado": 24.500499999999995
+    },
+    "1406271417586024469": {
+        "carteira": 495,
+        "banco": 0,
+        "acoes": {},
+        "cc_stats": {
+            "jogos": 0,
+            "vitorias": 0,
+            "total_apostado": 0,
+            "lucro_total": 0
+        }
+    }
+}
