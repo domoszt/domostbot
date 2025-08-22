@@ -1,14 +1,19 @@
 {
     "1269085403483344957": {
         "carteira": 0.0,
-        "banco": 0.0,
+        "banco": 561.0,
         "cc_stats": {
             "jogos": 48,
             "vitorias": 15,
             "total_apostado": 138378,
             "lucro_total": 12473.349999999999
         },
-        "acoes": {}
+        "acoes": {
+            "AMZN": {
+                "quantidade": 2,
+                "preco_medio_compra": 486.45
+            }
+        }
     },
     "907306461837799465": {
         "carteira": 13,
@@ -21,7 +26,7 @@
             "lucro_total": 0
         }
     },
-    "cofre_impostos": 1000.0883,
+    "cofre_impostos": 3383.4882999999995,
     "impostos_diarios": {
         "jogos": 49.5,
         "mercado": 24.500499999999995

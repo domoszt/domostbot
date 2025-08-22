@@ -1,50 +1,50 @@
 {
     "DMS": {
         "nome": "Domost Dynamics",
-        "preco": 17.41,
-        "preco_anterior": 18.69,
-        "tendencia": "baixa"
+        "preco": 20.3,
+        "preco_anterior": 20.25,
+        "tendencia": "estavel"
     },
     "VLI": {
         "nome": "Vale a Pena S.A.",
-        "preco": 298.26,
-        "preco_anterior": 275.64,
+        "preco": 365.97,
+        "preco_anterior": 340.03,
         "tendencia": "alta"
     },
     "PTR": {
         "nome": "Petrobr\u00e1sica",
-        "preco": 17.12,
-        "preco_anterior": 17.4,
-        "tendencia": "estavel"
+        "preco": 17.72,
+        "preco_anterior": 17.82,
+        "tendencia": "alta"
     },
     "ITU": {
         "nome": "Banco Itudo",
-        "preco": 13.35,
-        "preco_anterior": 12.97,
-        "tendencia": "baixa"
+        "preco": 10.72,
+        "preco_anterior": 10.71,
+        "tendencia": "estavel"
     },
     "MGL": {
         "nome": "Magazine Luiza & Cia",
-        "preco": 1.77,
-        "preco_anterior": 1.79,
-        "tendencia": "baixa"
+        "preco": 1.32,
+        "preco_anterior": 1.32,
+        "tendencia": "estavel"
     },
     "APPL": {
         "nome": "Ma\u00e7\u00e3 Inc.",
-        "preco": 1290.56,
-        "preco_anterior": 1280.93,
+        "preco": 893.46,
+        "preco_anterior": 952.4,
         "tendencia": "baixa"
     },
     "AMZN": {
         "nome": "Amaz\u00f4nia Prime",
-        "preco": 526.47,
-        "preco_anterior": 533.56,
-        "tendencia": "estavel"
+        "preco": 380.6,
+        "preco_anterior": 401.91,
+        "tendencia": "baixa"
     },
     "TSL": {
         "nome": "Tesla Motors Corporation",
-        "preco": 327.38,
-        "preco_anterior": 342.55,
-        "tendencia": "estavel"
+        "preco": 206.89,
+        "preco_anterior": 206.97,
+        "tendencia": "baixa"
     }
 }
