@@ -1,5 +1,7 @@
 import ast
 import operator as op
+import locale
+from typing import Union
 
 # Dicionário que mapeia nós da AST para funções de operador seguras
 _OPERATORS = {
@@ -30,3 +32,18 @@ class SafeCalculator:
         expression = expression.replace('^', '**')
         tree = ast.parse(expression, mode='eval').body
         return self._eval_node(tree)
+
+def format_brl(valor: Union[int, float]) -> str:
+    """Formata um número para o padrão de moeda brasileiro. Usa um fallback robusto."""
+    try:
+        # Tenta usar o locale do sistema para a formatação ideal
+        locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+        return locale.currency(float(valor), grouping=True, symbol="R$")
+    except (ValueError, TypeError, ImportError, locale.Error):
+        # Fallback manual caso o locale não esteja disponível no sistema
+        try:
+            a = f'{float(valor):,.2f}'
+            b = a.replace(',', 'v').replace('.', ',').replace('v', '.')
+            return f"R$ {b}"
+        except (ValueError, TypeError):
+            return "R$ 0,00"
