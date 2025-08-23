@@ -1,7 +1,7 @@
 {
     "1269085403483344957": {
         "carteira": 0.0,
-        "banco": 561.0,
+        "banco": 1107.0,
         "cc_stats": {
             "jogos": 48,
             "vitorias": 15,
@@ -43,7 +43,7 @@
         }
     },
     "1408213537226231900": {
-        "carteira": 0.0,
+        "carteira": 255.0,
         "banco": 0,
         "acoes": {},
         "cc_stats": {
